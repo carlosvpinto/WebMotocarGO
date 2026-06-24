@@ -1,0 +1,129 @@
+/* Colores de MotoCarGO */
+:root {
+    --color-orange: #EF6339;
+    --color-dark: #1A1A1A;
+    --color-bg: #F5F6F8;
+}
+
+body {
+    background-color: var(--color-bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Diseño del Menú Lateral */
+.sidebar {
+    background-color: var(--color-dark);
+    min-height: 100vh;
+    color: white;
+    padding-top: 30px;
+}
+
+.brand-logo {
+    color: var(--color-orange);
+    font-weight: 900;
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+}
+
+.sidebar a {
+    color: #A0A0A0;
+    text-decoration: none;
+    display: block;
+    padding: 15px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    background-color: var(--color-orange);
+    color: white;
+}
+
+/* Diseño del Área de Contenido */
+.content-area {
+    background-color: var(--color-bg);
+}
+
+/* Diseño de las Tarjetas de Métricas */
+.card-metric {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-left: 5px solid var(--color-orange);
+    transition: transform 0.2s ease;
+}
+
+.card-metric:hover {
+    transform: translateY(-5px);
+}
+
+/* Botón Personalizado */
+.btn-motocargo {
+    background-color: var(--color-orange);
+    color: white;
+    border: none;
+    border-radius: 6px;
+}
+
+.btn-motocargo:hover {
+    background-color: #d14f29;
+    color: white;
+}
+
+/* ========================================== */
+/* DISEÑO RESPONSIVE Y VISTAS MAGICAS         */
+/* ========================================== */
+
+/* Clases para ocultar/mostrar pantallas */
+.view-section {
+    display: none;
+    animation: fadeIn 0.4s;
+}
+
+.view-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Botón flotante para celulares (Hamburguesa) */
+.mobile-nav {
+    display: none;
+    background-color: var(--color-dark);
+    padding: 15px;
+    color: white;
+}
+
+/* Adaptación a pantallas de celular y tablets */
+@media (max-width: 768px) {
+    .mobile-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        z-index: 9999;
+        width: 250px;
+        transition: 0.3s;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+    }
+
+    .sidebar.show {
+        left: 0; /* Aparece el menú lateral */
+    }
+
+    .content-area {
+        padding: 15px !important;
+    }
+}

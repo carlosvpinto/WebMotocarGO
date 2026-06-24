@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotoCarGO - Admin Panel</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Iconos -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Tu CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Estilos específicos para la pantalla de Login */
+        #login-screen { 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background-color: var(--color-dark); 
+        }
+        .login-card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            width: 100%; 
+            max-width: 400px; 
+        }
+    </style>
+</head>
+<body>
+
+<!-- PANTALLA DE LOGIN -->
+<div id="login-screen">
+    <div class="login-card shadow-lg">
+        <h3 class="text-center mb-4 fw-bold" style="color: #EF6339;">MotoCarGO Admin</h3>
+        <input type="email" id="admin-email" class="form-control mb-3" placeholder="Correo electrónico">
+        <input type="password" id="admin-pass" class="form-control mb-4" placeholder="Contraseña">
+        <button class="btn btn-motocargo w-100 py-2 fw-bold" onclick="iniciarSesion()">INGRESAR AL PANEL</button>
+        <p id="login-error" class="text-danger mt-3 text-center fw-bold" style="display:none;"></p>
+    </div>
+</div>
+
+<!-- EL DASHBOARD PRINCIPAL -->
+<div id="dashboard-screen" style="display: none;">
+    
+    <!-- BARRA SUPERIOR PARA CELULARES -->
+    <div class="mobile-nav d-md-none">
+        <span class="fw-bold" style="color: #EF6339; font-size: 20px;">MotoCarGO</span>
+        <span class="material-icons" onclick="toggleMenu()" style="cursor: pointer;">menu</span>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            
+            <!-- MENÚ LATERAL -->
+            <div class="col-md-2 sidebar" id="sidebar">
+                <div class="brand-logo d-none d-md-block">MotoCarGO</div>
+                <a href="#" id="nav-inicio" class="nav-link active" onclick="cambiarVista('inicio')"><span class="material-icons align-middle me-2">dashboard</span> Inicio</a>
+                <a href="#" id="nav-kyc" class="nav-link" onclick="cambiarVista('kyc')"><span class="material-icons align-middle me-2">pending_actions</span> Verificaciones KYC</a>
+                <a href="#" id="nav-pagos" class="nav-link" onclick="cambiarVista('pagos')"><span class="material-icons align-middle me-2">payments</span> Pagos Mercantil</a>
+                <a href="#" id="nav-clientes" class="nav-link" onclick="cambiarVista('clientes')"><span class="material-icons align-middle me-2">person</span> Clientes</a>
+                <a href="#" id="nav-conductores" class="nav-link" onclick="cambiarVista('conductores')"><span class="material-icons align-middle me-2">two_wheeler</span> Conductores</a>
+                <a href="#" id="nav-historial" class="nav-link" onclick="cambiarVista('historial')"><span class="material-icons align-middle me-2">history</span> Historial de Viajes</a>
+                <a href="#" id="nav-tarifas" class="nav-link" onclick="cambiarVista('tarifas')"><span class="material-icons align-middle me-2">settings</span> Tarifas por País</a>
+                <a href="#" onclick="cerrarSesion()" style="margin-top: 50px; color: #ff5252;"><span class="material-icons align-middle me-2">logout</span> Cerrar Sesión</a>
+            </div>
+
+            <!-- ÁREA DE CONTENIDO -->
+            <div class="col-md-10 p-4 content-area">
+                
+                <!-- 👇 VISTA 1: INICIO (MÉTRICAS) 👇 -->
+          <!-- 👇 VISTA 1: INICIO (MÉTRICAS) 👇 -->
+                <div id="view-inicio" class="view-section active">
+                    <h2 class="mb-4 text-dark fw-bold">Dashboard de Métricas</h2>
+                    <div class="row">
+                        <!-- Tarjeta Conductores (Clickeable) -->
+                        <div class="col-md-4" style="cursor: pointer;" onclick="cambiarVista('conductores')">
+                            <div class="card card-metric p-3 mb-4">
+                                <h6 class="text-muted">Total Conductores</h6>
+                                <h2 class="fw-bold" id="total-conductores">0</h2>
+                            </div>
+                        </div>
+                        <!-- Tarjeta Clientes (Clickeable) -->
+                        <div class="col-md-4" style="cursor: pointer;" onclick="cambiarVista('clientes')">
+                            <div class="card card-metric p-3 mb-4">
+                                <h6 class="text-muted">Total Clientes</h6>
+                                <h2 class="fw-bold" id="total-clientes">0</h2>
+                            </div>
+                        </div>
+                        <!-- Tarjeta KYC (Clickeable) -->
+                        <div class="col-md-4" style="cursor: pointer;" onclick="cambiarVista('kyc')">
+                            <div class="card card-metric p-3 mb-4" style="border-left-color: #E3E500;">
+                                <h6 class="text-muted">KYC Pendientes</h6>
+                                <h2 class="fw-bold text-warning" id="total-pendientes">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 👇 VISTA 2: KYC 👇 -->
+                <div id="view-kyc" class="view-section">
+                    <h2 class="mb-4 text-dark fw-bold">Verificaciones KYC</h2>
+                    <div class="card shadow-sm border-0" style="border-radius: 12px;">
+                        <div class="card-body table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light"><tr><th>Conductor</th><th>Cédula</th><th>Vehículo</th><th>Estado</th><th>Acciones</th></tr></thead>
+                                <tbody id="tabla-kyc"><tr><td colspan="5" class="text-center">Cargando...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 👇 VISTA 3: PAGOS MERCANTIL 👇 -->
+                <div id="view-pagos" class="view-section">
+                    <h2 class="mb-4 text-dark fw-bold">Historial de Pagos</h2>
+                    <div class="card shadow-sm border-0" style="border-radius: 12px;">
+                        <div class="card-body table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light"><tr><th>Fecha</th><th>Referencia</th><th>Tel. Origen</th><th>Monto</th><th>Plan</th></tr></thead>
+                                <tbody id="tabla-pagos"><tr><td colspan="5" class="text-center">Cargando pagos...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+           <!-- 👇 VISTA: CLIENTES 👇 -->
+                <div id="view-clientes" class="view-section">
+                    <h2 class="mb-4 text-dark fw-bold">Gestión de Clientes</h2>
+                    <div class="card shadow-sm border-0" style="border-radius: 12px;">
+                        <!-- Le puse p-3 para darle margen interno bonito -->
+                        <div class="card-body p-3"> 
+                            
+                            <!-- BUSCADOR DE CLIENTES -->
+                            <input type="text" id="busqueda-cliente" class="form-control mb-3" style="border: 2px solid #EF6339;" placeholder="🔍 Buscar cliente por nombre, correo o teléfono..." onkeyup="filtrarTabla('busqueda-cliente', 'tabla-clientes-only')">
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th class="d-none d-md-table-cell">Contacto</th>
+                                            <th>Billetera</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-clientes-only">
+                                        <tr><td colspan="4" class="text-center py-4">Cargando clientes...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 👇 VISTA: CONDUCTORES 👇 -->
+                <div id="view-conductores" class="view-section">
+                    <h2 class="mb-4 text-dark fw-bold">Gestión de Conductores</h2>
+                    <div class="card shadow-sm border-0" style="border-radius: 12px;">
+                        <div class="card-body p-3">
+                            
+                            <!-- BUSCADOR DE CONDUCTORES -->
+                            <input type="text" id="busqueda-conductor" class="form-control mb-3" style="border: 2px solid #EF6339;" placeholder="🔍 Buscar conductor por nombre, placa o cédula..." onkeyup="filtrarTabla('busqueda-conductor', 'tabla-conductores-only')">
+
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Conductor</th>
+                                            <th class="d-none d-lg-table-cell">Vehículo</th>
+                                            <th class="d-none d-md-table-cell">Suscripción</th>
+                                            <th>Estatus</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-conductores-only">
+                                        <tr><td colspan="5" class="text-center py-4">Cargando conductores...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+           <!-- 👇 VISTA: HISTORIAL DE VIAJES 👇 -->
+                <div id="view-historial" class="view-section">
+                    <h2 class="mb-4 text-dark fw-bold">Historial de Viajes</h2>
+                    
+                    <!-- BUSCADOR / FILTRO POR CONDUCTOR (Diseño Responsive) -->
+                    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; border-top: 4px solid #EF6339;">
+                        <div class="card-body">
+                            <!-- Usamos 'row g-3' para que en PC estén en 1 línea, y en celular se apilen -->
+                            <div class="row g-3 align-items-center">
+                                
+                                <!-- Caja de Búsqueda -->
+                                <div class="col-12 col-md-4">
+                                    <input type="text" id="busqueda-historial" class="form-control" style="border-color:#EF6339;" placeholder="🔍 Buscar nombre o C.I..." onkeyup="filtrarOpcionesHistorial()">
+                                </div>
+                                
+                                <!-- Selector de Conductor -->
+                                <div class="col-12 col-md-5 d-flex align-items-center">
+                                    <label for="select-filtro-conductor" class="form-label fw-bold mb-0 me-2 text-nowrap">Conductor:</label>
+                                    <select id="select-filtro-conductor" class="form-select w-100" onchange="filtrarHistorial()">
+                                        <option value="TODOS">Cargando conductores...</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Contador de Viajes -->
+                                <div class="col-12 col-md-3">
+                                    <div class="px-3 py-2 bg-light rounded text-center border">
+                                        <span class="text-muted small fw-bold">TOTAL SERVICIOS</span><br>
+                                        <span class="fw-bold fs-4" style="color: #EF6339;" id="contador-viajes">0</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TABLA DE RESULTADOS (Responsive) -->
+                    <div class="card shadow-sm border-0" style="border-radius: 12px;">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Fecha y Conductor</th>
+                                            <th>Ruta (A ➔ B)</th>
+                                            <th class="d-none d-lg-table-cell">Recorrido</th> <!-- Se oculta en teléfonos -->
+                                            <th>Ganancia</th>
+                                            <th class="d-none d-md-table-cell">Estrellas</th> <!-- Se oculta en teléfonos -->
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-historial">
+                                        <tr><td colspan="5" class="text-center py-4">Selecciona un conductor para ver sus viajes...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+               <!-- 👇 VISTA 5: TARIFAS 👇 -->
+                <div id="view-tarifas" class="view-section">
+                    <h2 class="mb-4 text-dark fw-bold">Configuración por País</h2>
+                    
+                    <!-- SELECTOR DE PAÍS -->
+                    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+                        <div class="card-body d-flex align-items-center">
+                            <label for="select-pais" class="form-label fw-bold mb-0 me-3">Selecciona el País a configurar:</label>
+                            <select id="select-pais" class="form-select w-auto" onchange="cargarConfiguracionPais()">
+                                <option value="VE">Venezuela (VE)</option>
+                                <option value="CO">Colombia (CO)</option>
+                                <option value="PE">Perú (PE)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- PLANES DE SUSCRIPCIÓN -->
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; border-top: 4px solid #EF6339;">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold text-dark mb-4"><span class="material-icons align-middle text-warning me-1">star</span> Planes de Suscripción</h5>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted small fw-bold">Símbolo de Moneda (Ej: Bs, COP, $)</label>
+                                        <input type="text" id="plan-moneda" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted small fw-bold">Plan Mensual (En USD)</label>
+                                        <input type="number" step="0.01" id="plan-mensual" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted small fw-bold">Plan Anual (En USD)</label>
+                                        <input type="number" step="0.01" id="plan-anual" class="form-control">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label text-muted small fw-bold">Plan Vitalicio (En USD)</label>
+                                        <input type="number" step="0.01" id="plan-vitalicio" class="form-control">
+                                    </div>
+                                    
+                                    <button class="btn btn-motocargo w-100 fw-bold py-2" onclick="guardarPlanes()">GUARDAR PLANES</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TARIFAS DE VIAJE -->
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; border-top: 4px solid #1A1A1A;">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold text-dark mb-4"><span class="material-icons align-middle text-success me-1">two_wheeler</span> Tarifas de Viajes (En USD)</h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label text-muted small">Moto - Corta</label>
+                                            <input type="number" step="0.01" id="tarifa-moto-corta" class="form-control">
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label text-muted small">Carro/Cargo - Corta</label>
+                                            <input type="number" step="0.01" id="tarifa-carro-corta" class="form-control">
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label text-muted small">Moto - Media</label>
+                                            <input type="number" step="0.01" id="tarifa-moto-media" class="form-control">
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label text-muted small">Carro/Cargo - Media</label>
+                                            <input type="number" step="0.01" id="tarifa-carro-media" class="form-control">
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label text-muted small">Moto - Larga</label>
+                                            <input type="number" step="0.01" id="tarifa-moto-larga" class="form-control">
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label text-muted small">Carro/Cargo - Larga</label>
+                                            <input type="number" step="0.01" id="tarifa-carro-larga" class="form-control">
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label text-muted small">Moto - Km Extra</label>
+                                            <input type="number" step="0.01" id="tarifa-moto-km" class="form-control">
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label text-muted small">Carro - Km Extra</label>
+                                            <input type="number" step="0.01" id="tarifa-carro-km" class="form-control">
+                                        </div>
+                                        <div class="col-12 mb-4">
+                                            <label class="form-label text-muted small fw-bold">Tasa de Cambio Manual (Si falla la API)</label>
+                                            <input type="number" step="0.01" id="tarifa-tasa" class="form-control bg-light">
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-dark w-100 fw-bold py-2" onclick="guardarPrecios()">GUARDAR TARIFAS DE VIAJE</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- LIBRERÍAS DE JAVASCRIPT OBLIGATORIAS       -->
+<!-- ========================================== -->
+
+<!-- Bootstrap JS (Esto hace que funcionen las pestañas de Clientes/Conductores) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Scripts de Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> 
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<!-- Tu lógica (Asegúrate de tener el código que te pasé en app.js) -->
+<script src="app.js"></script>
+
+</body>
+</html>
