@@ -26,7 +26,7 @@ auth.onAuthStateChanged((user) => {
         cargarMetricas();
         cargarTablaKYC();
         cargarTablaPagos();
-        cargarTablaUsuarios();
+        //cargarTablaUsuarios();
          // 👇 AHORA LLAMAMOS A LAS DOS NUEVAS 👇
         cargarTablaClientes();
         cargarTablaConductores();
@@ -101,27 +101,29 @@ function abrirUsuariosTab(tipo) {
         document.getElementById('pills-clientes').classList.add('show', 'active');
     }
 }
+
 // ==========================================
 // FUNCIONES DE BASE DE DATOS (BLINDADAS)
 // ==========================================
 
 function cargarMetricas() {
+    // 1. Contar Total de Conductores
     db.collection("Drivers").get().then((querySnapshot) => {
         const elConductores = document.getElementById("total-conductores");
         if(elConductores) elConductores.innerText = querySnapshot.size;
-        
-        let pendientes = 0;
-        querySnapshot.forEach((doc) => {
-            if(doc.data().estadoVerificacion === "Pendiente") pendientes++;
-        });
-        const elPendientes = document.getElementById("total-pendientes");
-        if(elPendientes) elPendientes.innerText = pendientes;
-    });
+    }).catch(error => console.error("Error al cargar conductores:", error));
 
+    // 2. Contar Total de Clientes
     db.collection("Clients").get().then((querySnapshot) => {
         const elClientes = document.getElementById("total-clientes");
         if(elClientes) elClientes.innerText = querySnapshot.size;
-    });
+    }).catch(error => console.error("Error al cargar clientes:", error));
+
+    // 👇 3. NUEVO: Contar Total de Viajes Realizados 👇
+    db.collection("Histories").get().then((querySnapshot) => {
+        const elViajes = document.getElementById("total-viajes");
+        if(elViajes) elViajes.innerText = querySnapshot.size;
+    }).catch(error => console.error("Error al cargar viajes:", error));
 }
 
 function cargarTablaKYC() {
@@ -472,10 +474,12 @@ function abrirVerificacion(driverId) {
 // MÓDULO DE CONFIGURACIÓN DE TARIFAS (CRUD)
 // ==========================================
 
+// 2. Cargar Tarifas de Viaje y Configuración
+// 2. Cargar Tarifas de Viaje y Configuración
 function cargarConfiguracionPais() {
     const pais = document.getElementById("select-pais").value;
     
-    // 1. Cargar Planes de Suscripción
+    // Cargar Planes de Suscripción
     db.collection("Config").doc("planes_" + pais).get().then((doc) => {
         if (doc.exists) {
             const data = doc.data();
@@ -492,14 +496,13 @@ function cargarConfiguracionPais() {
         }
     }).catch(err => console.log("Aún no hay planes para este país"));
 
-    // 2. Cargar Tarifas de Viaje
-    // Lógica inteligente: Si es VE, busca el doc viejo 'prices'. Si es otro, busca 'prices_PAIS'
-    let docPricesId = pais === "VE" ? "prices" : "prices_" + pais;
+    // 👇 CORRECCIÓN AQUÍ: AHORA SIEMPRE BUSCARÁ prices_VE, prices_CO, etc. 👇
+    let docPricesId = "prices_" + pais;
 
     db.collection("Config").doc(docPricesId).get().then((doc) => {
         if (doc.exists) {
             const data = doc.data();
-            // Respetamos las mayúsculas exactas que tienes en tu base de datos de Android
+            // Respetamos las mayúsculas exactas
             document.getElementById("tarifa-moto-corta").value = data.CcortaMoto || "";
             document.getElementById("tarifa-carro-corta").value = data.CcortaCarro || "";
             document.getElementById("tarifa-moto-media").value = data.CmediaMoto || "";
@@ -508,16 +511,47 @@ function cargarConfiguracionPais() {
             document.getElementById("tarifa-carro-larga").value = data.CLargaCarro || "";
             document.getElementById("tarifa-moto-km").value = data.kmMoto || "";
             document.getElementById("tarifa-carro-km").value = data.kmCarro || "";
-            document.getElementById("tarifa-tasa").value = data.taza || data.tasa || ""; // Tu Android usa "taza" con Z
+            document.getElementById("tarifa-tasa").value = data.taza || ""; 
+            
+            // Leemos la palabra Delivery / Encomienda
+            document.getElementById("config-nombre-delivery").value = data.nombreDelivery || "Delivery";
         } else {
             // Limpiar si no existe
-            document.querySelectorAll('#view-tarifas input[type="number"]').forEach(input => {
-                if(!input.id.includes('plan')) input.value = "";
+            document.querySelectorAll('#view-tarifas input').forEach(input => {
+                if(!input.id.includes('plan') && input.id !== 'select-pais') input.value = "";
             });
         }
     }).catch(err => console.log("Aún no hay tarifas para este país"));
 }
 
+// GUARDAR LOS PRECIOS
+function guardarPrecios() {
+    const pais = document.getElementById("select-pais").value;
+    
+    // 👇 CORRECCIÓN AQUÍ TAMBIÉN 👇
+    let docPricesId = "prices_" + pais;
+
+    const data = {
+        CcortaMoto: parseFloat(document.getElementById("tarifa-moto-corta").value) || 0,
+        CcortaCarro: parseFloat(document.getElementById("tarifa-carro-corta").value) || 0,
+        CmediaMoto: parseFloat(document.getElementById("tarifa-moto-media").value) || 0,
+        CMediaCarro: parseFloat(document.getElementById("tarifa-carro-media").value) || 0,
+        CLargaMoto: parseFloat(document.getElementById("tarifa-moto-larga").value) || 0,
+        CLargaCarro: parseFloat(document.getElementById("tarifa-carro-larga").value) || 0,
+        kmMoto: parseFloat(document.getElementById("tarifa-moto-km").value) || 0,
+        kmCarro: parseFloat(document.getElementById("tarifa-carro-km").value) || 0,
+        taza: parseFloat(document.getElementById("tarifa-tasa").value) || 0,
+        
+        nombreDelivery: document.getElementById("config-nombre-delivery").value || "Delivery"
+    };
+
+    db.collection("Config").doc(docPricesId).set(data, { merge: true }).then(() => {
+        alert("✅ Tarifas y Configuración actualizadas con éxito para " + pais);
+    }).catch(err => {
+        console.error(err);
+        alert("Error al guardar las tarifas de viaje.");
+    });
+}
 function guardarPlanes() {
     const pais = document.getElementById("select-pais").value;
     const moneda = document.getElementById("plan-moneda").value;
@@ -540,30 +574,5 @@ function guardarPlanes() {
     }).catch(err => {
         console.error(err);
         alert("Error al guardar los planes.");
-    });
-}
-
-function guardarPrecios() {
-    const pais = document.getElementById("select-pais").value;
-    let docPricesId = pais === "VE" ? "prices" : "prices_" + pais;
-
-    // Recolectamos los datos respetando la estructura de tu Android
-    const data = {
-        CcortaMoto: parseFloat(document.getElementById("tarifa-moto-corta").value) || 0,
-        CcortaCarro: parseFloat(document.getElementById("tarifa-carro-corta").value) || 0,
-        CmediaMoto: parseFloat(document.getElementById("tarifa-moto-media").value) || 0,
-        CMediaCarro: parseFloat(document.getElementById("tarifa-carro-media").value) || 0,
-        CLargaMoto: parseFloat(document.getElementById("tarifa-moto-larga").value) || 0,
-        CLargaCarro: parseFloat(document.getElementById("tarifa-carro-larga").value) || 0,
-        kmMoto: parseFloat(document.getElementById("tarifa-moto-km").value) || 0,
-        kmCarro: parseFloat(document.getElementById("tarifa-carro-km").value) || 0,
-        taza: parseFloat(document.getElementById("tarifa-tasa").value) || 0
-    };
-
-    db.collection("Config").doc(docPricesId).set(data, { merge: true }).then(() => {
-        alert("✅ Tarifas de viaje actualizadas con éxito para " + pais);
-    }).catch(err => {
-        console.error(err);
-        alert("Error al guardar las tarifas de viaje.");
     });
 }
