@@ -349,6 +349,90 @@
 </div>
 
 <!-- ========================================== -->
+<!-- MODAL DE DETALLES DEL CONDUCTOR            -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalDetallesConductor" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; border-top: 5px solid #EF6339;">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-dark"><span class="material-icons align-middle text-primary me-2">badge</span> Ficha del Conductor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                
+                <!-- SECCIÓN 1: PERFIL BÁSICO -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-3 text-center">
+                        <img id="det-img-perfil" src="" alt="Perfil" class="img-fluid rounded-circle shadow-sm" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #EF6339;">
+                    </div>
+                    <div class="col-md-9">
+                        <h4 id="det-nombre" class="fw-bold mb-1">Nombre del Conductor</h4>
+                        <p class="text-muted mb-2" id="det-id-firebase" style="font-size: 12px;">ID: ...</p>
+                        <div class="row">
+                            <div class="col-6"><small class="text-muted">C.I:</small> <strong id="det-cedula">...</strong></div>
+                            <div class="col-6"><small class="text-muted">Teléfono:</small> <strong id="det-phone">...</strong></div>
+                            <div class="col-12 mt-1"><small class="text-muted">Email:</small> <strong id="det-email">...</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- SECCIÓN 2: VEHÍCULO Y FINANZAS -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-dark"><span class="material-icons align-middle fs-5 me-1 text-success">two_wheeler</span> Datos del Vehículo</h6>
+                        <ul class="list-unstyled">
+                            <li><small class="text-muted">Tipo:</small> <strong id="det-tipo">...</strong></li>
+                            <li><small class="text-muted">Marca:</small> <strong id="det-marca">...</strong></li>
+                            <li><small class="text-muted">Color:</small> <strong id="det-color">...</strong></li>
+                            <li><small class="text-muted">Placa:</small> <strong id="det-placa">...</strong></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-dark"><span class="material-icons align-middle fs-5 me-1 text-warning">account_balance_wallet</span> Finanzas y Estado</h6>
+                        <ul class="list-unstyled">
+                            <li><small class="text-muted">Billetera:</small> <strong class="text-success" id="det-billetera">0.00 $</strong></li>
+                            <li><small class="text-muted">Plan Actual:</small> <strong id="det-plan">...</strong></li>
+                            <li><small class="text-muted">Periodo:</small> <span id="det-fechas" style="font-size: 13px; font-weight: bold;">...</span></li>
+                            <li class="mt-2"><small class="text-muted">Estatus Actual:</small> <span id="det-estado" class="badge bg-secondary">...</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- SECCIÓN 3: DOCUMENTOS (FOTOS) -->
+                <h6 class="fw-bold text-dark mb-3"><span class="material-icons align-middle fs-5 me-1 text-info">folder_shared</span> Documentos Adjuntos</h6>
+                <div class="row text-center">
+                    <div class="col-md-6 mb-3">
+                        <p class="small fw-bold mb-1">Cédula de Identidad</p>
+                        <a id="link-cedula" href="#" target="_blank">
+                            <img id="det-img-cedula" src="" class="img-fluid rounded border shadow-sm" style="max-height: 150px; object-fit: contain; background: #f8f9fa;">
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="small fw-bold mb-1">Registro Civil / Vehículo</p>
+                        <a id="link-registro" href="#" target="_blank">
+                            <img id="det-img-registro" src="" class="img-fluid rounded border shadow-sm" style="max-height: 150px; object-fit: contain; background: #f8f9fa;">
+                        </a>
+                    </div>
+                    <div class="col-12">
+                        <small class="text-muted">Haz clic en los documentos para verlos en tamaño completo.</small>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar Detalles</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- ========================================== -->
 <!-- LIBRERÍAS DE JAVASCRIPT OBLIGATORIAS       -->
 <!-- ========================================== -->
 

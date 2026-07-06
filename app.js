@@ -273,6 +273,10 @@ function cargarTablaConductores() {
                         </td>
                         <td style="min-width: 100px;">
                             <div class="d-flex flex-column">
+
+                                <!-- 👇 NUEVO BOTÓN DE DETALLES 👇 -->
+                                <button class="btn btn-sm btn-info text-white w-100 mb-1 fw-bold" onclick="abrirDetallesConductor('${doc.id}')">Ver Detalles</button>
+
                                 ${btnActivar}
                                 <button class="btn btn-sm btn-danger w-100" onclick="eliminarUsuario('Drivers', '${doc.id}')">
                                     <span class="material-icons" style="font-size: 16px; vertical-align: middle;">delete</span>
@@ -574,5 +578,65 @@ function guardarPlanes() {
     }).catch(err => {
         console.error(err);
         alert("Error al guardar los planes.");
+    });
+}
+
+// ==========================================
+// FUNCIÓN PARA VER FICHA COMPLETA DEL CONDUCTOR
+// ==========================================
+function abrirDetallesConductor(idDriver) {
+    db.collection("Drivers").doc(idDriver).get().then((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+
+            // 1. Datos Personales
+            document.getElementById("det-nombre").innerText = `${data.name || ''} ${data.lastname || ''}`;
+            document.getElementById("det-id-firebase").innerText = `ID Firebase: ${data.id || idDriver}`;
+            document.getElementById("det-cedula").innerText = data.cedula || "No registrada";
+            document.getElementById("det-phone").innerText = data.phone || "No registrado";
+            document.getElementById("det-email").innerText = data.email || "No registrado";
+
+            // 2. Datos del Vehículo
+            document.getElementById("det-tipo").innerText = data.tipo || "N/A";
+            document.getElementById("det-marca").innerText = data.brandCar || "N/A";
+            document.getElementById("det-color").innerText = data.colorCar || "N/A";
+            document.getElementById("det-placa").innerText = data.plateNumber || "N/A";
+
+            // 3. Finanzas y Estado
+            const billetera = (data.billetera || 0).toFixed(2);
+            document.getElementById("det-billetera").innerText = `${billetera} $`;
+            document.getElementById("det-plan").innerText = data.planSuscripcion || "Ninguno";
+            
+            const fechaInicio = data.fechaInicioSuscripcion || "--/--/----";
+            const fechaFin = data.fechaVencimiento || "--/--/----";
+            document.getElementById("det-fechas").innerText = `${fechaInicio} al ${fechaFin}`;
+
+            // Estatus con colores
+            const estadoSpan = document.getElementById("det-estado");
+            estadoSpan.innerText = `${data.estadoVerificacion || "No Verificado"} | ${data.activado ? 'App Activa' : 'App Bloqueada'}`;
+            estadoSpan.className = `badge ${data.estadoVerificacion === "Aprobado" ? "bg-success" : "bg-danger"}`;
+
+            // 4. Documentos y Fotos (Con validación por si están vacíos)
+            const defaultImg = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+            const defaultDoc = "https://placehold.co/300x200?text=Documento+No+Subido";
+
+            document.getElementById("det-img-perfil").src = data.image || defaultImg;
+            
+            document.getElementById("det-img-cedula").src = data.urlCedula || defaultDoc;
+            document.getElementById("link-cedula").href = data.urlCedula || "#";
+
+            document.getElementById("det-img-registro").src = data.urlRegistroCivil || defaultDoc;
+            document.getElementById("link-registro").href = data.urlRegistroCivil || "#";
+
+            // 5. ¡Abre la ventana flotante mágicamente!
+            var myModal = new bootstrap.Modal(document.getElementById('modalDetallesConductor'));
+            myModal.show();
+
+        } else {
+            alert("No se encontró la información del conductor.");
+        }
+    }).catch((error) => {
+        console.error("Error obteniendo detalles:", error);
+        alert("Error de conexión al cargar los detalles.");
     });
 }
