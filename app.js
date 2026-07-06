@@ -445,30 +445,64 @@ function cargarTablaHistorial(idFiltro) {
 }
 
 function cambiarEstadoConductor(id, nuevoEstado) {
-    const accionTexto = nuevoEstado ? "ACTIVAR" : "BLOQUEAR";
-    if(confirm(`¿Estás seguro que deseas ${accionTexto} a este conductor?`)) {
-        db.collection("Drivers").doc(id).update({ activado: nuevoEstado }).then(() => {
-            // 👇 RECARGAR LA TABLA CORRECTA 👇
-            cargarTablaConductores(); 
-        }).catch((error) => {
-            console.error("Error al actualizar:", error);
-            alert("Hubo un error de conexión.");
-        });
-    }
+    const accionTexto = nuevoEstado ? "Activar" : "Bloquear";
+    const icono = nuevoEstado ? "question" : "warning";
+
+    Swal.fire({
+        title: `¿Deseas ${accionTexto} a este conductor?`,
+        text: nuevoEstado ? "El conductor podrá recibir viajes inmediatamente." : "El conductor será desconectado y no podrá trabajar.",
+        icon: icono,
+        showCancelButton: true,
+        confirmButtonColor: '#EF6339', // Naranja MotoCarGO
+        cancelButtonColor: '#1A1A1A',  // Negro elegante
+        confirmButtonText: `Sí, ${accionTexto}`,
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            db.collection("Drivers").doc(id).update({ activado: nuevoEstado }).then(() => {
+                Swal.fire({
+                    title: '¡Hecho!',
+                    text: `El conductor ha sido ${nuevoEstado ? 'activado' : 'bloqueado'} con éxito.`,
+                    icon: 'success',
+                    confirmButtonColor: '#EF6339'
+                });
+                cargarTablaConductores(); 
+            }).catch((error) => {
+                console.error("Error al actualizar:", error);
+                Swal.fire('Error', 'Hubo un problema de conexión con la base de datos.', 'error');
+            });
+        }
+    });
 }
 
 function eliminarUsuario(coleccion, id) {
-    if(confirm("¿Estás 100% seguro de que deseas eliminar este usuario de la base de datos?")) {
-        db.collection(coleccion).doc(id).delete().then(() => {
-            // 👇 RECARGAMOS AMBAS TABLAS PARA IR A LO SEGURO 👇
-            cargarTablaClientes(); 
-            cargarTablaConductores(); 
-            cargarMetricas(); 
-        }).catch((error) => {
-            console.error("Error eliminando:", error);
-            alert("Error al eliminar usuario.");
-        });
-    }
+    Swal.fire({
+        title: '¿Estás 100% seguro?',
+        text: "¡No podrás revertir esto! El usuario y todos sus datos se borrarán para siempre.",
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#d33', // Rojo peligro
+        cancelButtonColor: '#1A1A1A',
+        confirmButtonText: 'Sí, ELIMINAR',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            db.collection(coleccion).doc(id).delete().then(() => {
+                Swal.fire({
+                    title: '¡Eliminado!',
+                    text: 'El usuario ha sido borrado del sistema.',
+                    icon: 'success',
+                    confirmButtonColor: '#EF6339'
+                });
+                cargarTablaClientes(); 
+                cargarTablaConductores(); 
+                cargarMetricas(); 
+            }).catch((error) => {
+                console.error("Error eliminando:", error);
+                Swal.fire('Error', 'No se pudo eliminar al usuario.', 'error');
+            });
+        }
+    });
 }
 
 function abrirVerificacion(driverId) {
@@ -531,9 +565,7 @@ function cargarConfiguracionPais() {
 // GUARDAR LOS PRECIOS
 function guardarPrecios() {
     const pais = document.getElementById("select-pais").value;
-    
-    // 👇 CORRECCIÓN AQUÍ TAMBIÉN 👇
-    let docPricesId = "prices_" + pais;
+    let docPricesId = pais === "VE" ? "prices" : "prices_" + pais;
 
     const data = {
         CcortaMoto: parseFloat(document.getElementById("tarifa-moto-corta").value) || 0,
@@ -545,17 +577,17 @@ function guardarPrecios() {
         kmMoto: parseFloat(document.getElementById("tarifa-moto-km").value) || 0,
         kmCarro: parseFloat(document.getElementById("tarifa-carro-km").value) || 0,
         taza: parseFloat(document.getElementById("tarifa-tasa").value) || 0,
-        
         nombreDelivery: document.getElementById("config-nombre-delivery").value || "Delivery"
     };
 
     db.collection("Config").doc(docPricesId).set(data, { merge: true }).then(() => {
-        alert("✅ Tarifas y Configuración actualizadas con éxito para " + pais);
+        Swal.fire('¡Éxito!', `Tarifas y configuración actualizadas para ${pais}`, 'success');
     }).catch(err => {
         console.error(err);
-        alert("Error al guardar las tarifas de viaje.");
+        Swal.fire('Error', 'Ocurrió un problema al guardar las tarifas.', 'error');
     });
 }
+
 function guardarPlanes() {
     const pais = document.getElementById("select-pais").value;
     const moneda = document.getElementById("plan-moneda").value;
@@ -564,7 +596,7 @@ function guardarPlanes() {
     const vitalicio = parseFloat(document.getElementById("plan-vitalicio").value);
 
     if(!moneda || isNaN(mensual)) {
-        alert("Completa al menos el símbolo de moneda y el plan mensual.");
+        Swal.fire('Faltan Datos', 'Completa al menos el símbolo de moneda y el plan mensual.', 'warning');
         return;
     }
 
@@ -574,10 +606,10 @@ function guardarPlanes() {
         anual: isNaN(anual) ? 0 : anual,
         vitalicio: isNaN(vitalicio) ? 0 : vitalicio
     }, { merge: true }).then(() => {
-        alert("✅ Planes de suscripción actualizados con éxito para " + pais);
+        Swal.fire('¡Éxito!', `Planes de suscripción actualizados para ${pais}`, 'success');
     }).catch(err => {
         console.error(err);
-        alert("Error al guardar los planes.");
+        Swal.fire('Error', 'Ocurrió un problema al guardar los planes.', 'error');
     });
 }
 
